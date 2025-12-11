@@ -1,0 +1,116 @@
+{% extends "base.html" %}
+
+{% block content %}
+  <style>
+    .welcome-wrapper {
+      min-height: 100vh;
+      padding: 3rem 1rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(135deg, #d6eaff 0%, #f0f6ff 40%, #ffffff 100%);
+    }
+
+    .welcome-card {
+      width: min(520px, 95vw);
+      background: #ffffff;
+      border-radius: 28px;
+      padding: 2.5rem;
+      box-shadow: 0 25px 60px rgba(15, 23, 42, 0.18);
+      border: 1px solid rgba(15, 23, 42, 0.08);
+    }
+
+    .welcome-card h1 {
+      margin: 0;
+      font-size: 2rem;
+      color: #0f172a;
+      margin-bottom: 0.4rem;
+    }
+
+    .welcome-card p.subtitle {
+      margin: 0;
+      color: #475569;
+      margin-bottom: 1.5rem;
+      line-height: 1.4;
+    }
+
+    .welcome-card form {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .field-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0.35rem;
+    }
+
+    .field-group label {
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: #475569;
+    }
+
+    .field-group input {
+      border-radius: 12px;
+      border: 1px solid rgba(71, 85, 105, 0.4);
+      padding: 0.85rem 1rem;
+      font-size: 1rem;
+      background: #f9fbff;
+      transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .field-group input:focus {
+      outline: none;
+      border-color: #2563eb;
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.2);
+    }
+
+    .welcome-card button {
+      border: none;
+      border-radius: 14px;
+      padding: 0.95rem;
+      font-size: 1rem;
+      font-weight: 600;
+      color: #ffffff;
+      background: linear-gradient(120deg, #2563eb, #60a5fa);
+      cursor: pointer;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .welcome-card button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 18px 30px rgba(37, 99, 235, 0.35);
+    }
+
+    .welcome-card small {
+      display: block;
+      margin-top: 0.5rem;
+      color: #94a3b8;
+      font-size: 0.85rem;
+    }
+  </style>
+
+  <section class="welcome-wrapper">
+    <article class="welcome-card">
+      <h1>Bem-vindo à sua papelaria</h1>
+      <p class="subtitle">
+        Complete as informações abaixo para deixar seu negócio pronto para os pedidos e o catálogo.
+      </p>
+      <form method="post">
+        {% csrf_token %}
+        {% for field in form %}
+          <div class="field-group">
+            {{ field.label_tag }}
+            {{ field }}
+            {% if field.help_text %}
+              <small>{{ field.help_text }}</small>
+            {% endif %}
+          </div>
+        {% endfor %}
+        <button type="submit">Atualizar informações</button>
+      </form>
+    </article>
+  </section>
+{% endblock %}

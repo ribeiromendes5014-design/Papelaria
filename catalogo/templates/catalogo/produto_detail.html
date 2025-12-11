@@ -1,0 +1,306 @@
+{% extends "base.html" %}
+
+{% block content %}
+  <section class="produto-detalhe">
+    <div class="produto-detalhe__media">
+      {% if object.imagem %}
+        <div class="produto-detalhe__image" style="background-image:url('{{ object.imagem }}');"></div>
+      {% else %}
+        <div class="produto-detalhe__image empty">Sem imagem</div>
+      {% endif %}
+    </div>
+    <div class="produto-detalhe__info">
+      <p class="produto-detalhe__categoria">{{ object.categoria.nome|default:"Categoria" }}</p>
+      <h2>{{ object.nome }}</h2>
+      <p class="produto-detalhe__descricao">{{ object.descricao|default:"Sem descriÇõÇœo." }}</p>
+      <strong class="produto-detalhe__preco">R$ {{ object.preco }}</strong>
+      <p class="produto-detalhe__estoque">Estoque: {{ object.estoque }}</p>
+
+      <form method="post" action="{% url 'catalogo:carrinho_adicionar' object.pk %}">
+        {% csrf_token %}
+        <input type="hidden" name="next" value="{{ request.get_full_path }}">
+        <div class="produto-detalhe__variacoes">
+          <p class="produto-detalhe__variacoes-title">Escolha as variaÇõÇœes (pode marcar mais de uma):</p>
+          {% if object.variacoes.all %}
+            {% regroup object.variacoes.all by categoria as variacoes_por_categoria %}
+            <div class="variacoes-list" id="variacoesDetalhe">
+              {% for grupo in variacoes_por_categoria %}
+                {% with categoria=grupo.grouper %}
+                  {% if categoria %}
+                    {% with cat_nome=categoria.nome cat_max=categoria.max_escolhas %}
+                      <div class="variacao-grupo" data-category="{{ cat_nome }}" data-max="{{ cat_max|default:99 }}">
+                        <p class="variacao-grupo-titulo">{{ cat_nome }} — escolha até {{ cat_max|default:99 }}</p>
+                        {% for variacao in grupo.list %}
+                          <label class="variacao-item">
+                            <input
+                              type="checkbox"
+                              name="variacoes"
+                              value="{{ variacao.pk }}"
+                              data-category="{{ cat_nome }}"
+                              data-max="{{ cat_max|default:99 }}"
+                            >
+                            <span class="variacao-label">
+                              {{ variacao.nome }}
+                              {% if variacao.tamanho %}<small>({{ variacao.tamanho }})</small>{% endif %}
+                            </span>
+                            {% if variacao.preco_adicional and variacao.preco_adicional != 0 %}
+                              <span class="variacao-preco">+ R$ {{ variacao.preco_adicional }}</span>
+                            {% else %}
+                              <span class="variacao-preco">Sem acréscimo</span>
+                            {% endif %}
+                          </label>
+                        {% endfor %}
+                      </div>
+                    {% endwith %}
+                  {% else %}
+                    <div class="variacao-grupo" data-category="Outros" data-max="99">
+                      <p class="variacao-grupo-titulo">Outras variações — escolha livre</p>
+                      {% for variacao in grupo.list %}
+                        <label class="variacao-item">
+                          <input
+                            type="checkbox"
+                            name="variacoes"
+                            value="{{ variacao.pk }}"
+                            data-category="Outros"
+                            data-max="99"
+                          >
+                          <span class="variacao-label">
+                            {{ variacao.nome }}
+                            {% if variacao.tamanho %}<small>({{ variacao.tamanho }})</small>{% endif %}
+                          </span>
+                          {% if variacao.preco_adicional and variacao.preco_adicional != 0 %}
+                            <span class="variacao-preco">+ R$ {{ variacao.preco_adicional }}</span>
+                          {% else %}
+                            <span class="variacao-preco">Sem acréscimo</span>
+                          {% endif %}
+                        </label>
+                      {% endfor %}
+                    </div>
+                  {% endif %}
+                {% endwith %}
+              {% endfor %}
+            </div>
+          {% else %}
+            <p class="variacao-empty">Nenhuma variaÇõÇœo cadastrada para este produto.</p>
+          {% endif %}
+        </div>
+        <div class="produto-detalhe__acoes">
+          <button type="submit" name="destination" value="cart" class="catalog-primary-btn">
+            Adicionar ao carrinho
+          </button>
+          <button type="submit" name="destination" value="checkout" class="catalog-icon-btn">
+            Comprar agora
+          </button>
+        </div>
+      </form>
+      <a class="produto-detalhe__link" href="{% url 'catalogo:carrinho' %}">Ir para o carrinho</a>
+    </div>
+  </section>
+
+  <style>
+    .produto-detalhe {
+      max-width: 1080px;
+      margin: 2rem auto;
+      background: #fff;
+      border-radius: 28px;
+      padding: 1.5rem;
+      box-shadow: 0 35px 90px rgba(15, 23, 42, 0.1);
+      display: grid;
+      gap: 1.5rem;
+      grid-template-columns: minmax(0, 420px) 1fr;
+      align-items: start;
+    }
+
+    .produto-detalhe__media {
+      width: 100%;
+    }
+
+    .produto-detalhe__image {
+      width: 100%;
+      padding-top: 100%;
+      border-radius: 24px;
+      background-size: cover;
+      background-position: center;
+      background-color: #f1f5f9;
+      display: grid;
+      place-items: center;
+      color: #475569;
+      font-weight: 700;
+    }
+
+    .produto-detalhe__info h2 {
+      margin: 0 0 0.25rem;
+      font-size: 2rem;
+      color: #0f172a;
+    }
+
+    .produto-detalhe__categoria {
+      margin: 0;
+      text-transform: uppercase;
+      letter-spacing: 0.25em;
+      color: #94a3b8;
+      font-size: 0.75rem;
+    }
+
+    .produto-detalhe__descricao {
+      color: #475569;
+      line-height: 1.6;
+    }
+
+    .produto-detalhe__preco {
+      font-size: 1.8rem;
+      color: #db2777;
+      display: inline-block;
+      margin: 0.5rem 0;
+    }
+
+    .produto-detalhe__estoque {
+      color: #475569;
+      margin: 0 0 1rem;
+      font-weight: 600;
+    }
+
+    .produto-detalhe__variacoes {
+      background: #f8fafc;
+      border: 1px dashed rgba(15, 23, 42, 0.12);
+      border-radius: 16px;
+      padding: 1rem;
+      margin-bottom: 1rem;
+    }
+
+    .produto-detalhe__variacoes-title {
+      margin: 0 0 0.5rem;
+      font-weight: 700;
+      color: #0f172a;
+    }
+
+    .variacoes-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    .variacao-grupo {
+      border: 1px dashed rgba(15, 23, 42, 0.1);
+      border-radius: 12px;
+      padding: 0.75rem 0.85rem;
+      background: #fff;
+      margin-bottom: 0.5rem;
+    }
+
+    .variacao-grupo-titulo {
+      margin: 0 0 0.35rem;
+      font-weight: 700;
+      color: #0f172a;
+      font-size: 0.95rem;
+    }
+
+    .variacao-item {
+      display: flex;
+      align-items: center;
+      gap: 0.65rem;
+      background: #fff;
+      border-radius: 12px;
+      padding: 0.75rem 0.85rem;
+      border: 1px solid rgba(15, 23, 42, 0.08);
+      box-shadow: 0 10px 30px rgba(15, 23, 42, 0.05);
+    }
+
+    .variacao-label {
+      flex: 1;
+      font-weight: 600;
+      color: #0f172a;
+    }
+
+    .variacao-label small {
+      color: #475569;
+      margin-left: 0.25rem;
+    }
+
+    .variacao-preco {
+      font-weight: 700;
+      color: #db2777;
+    }
+
+    .variacao-empty {
+      margin: 0;
+      color: #475569;
+    }
+
+    .produto-detalhe__acoes {
+      display: flex;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    .catalog-primary-btn {
+      border-radius: 14px;
+      border: none;
+      padding: 0.9rem 1.25rem;
+      background: linear-gradient(120deg, #ec4899, #d946ef);
+      color: #fff;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      box-shadow: 0 15px 35px rgba(236, 72, 153, 0.35);
+      cursor: pointer;
+    }
+
+    .catalog-icon-btn {
+      border-radius: 12px;
+      border: none;
+      padding: 0.9rem 1rem;
+      background: linear-gradient(180deg, #22c55e, #16a34a);
+      color: #fff;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      box-shadow: 0 10px 25px rgba(34, 197, 94, 0.35);
+      cursor: pointer;
+    }
+
+    .produto-detalhe__link {
+      display: inline-block;
+      margin-top: 0.75rem;
+      color: #0f172a;
+      font-weight: 700;
+    }
+
+    @media (max-width: 900px) {
+      .produto-detalhe {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+  <script>
+    (function () {
+      const container = document.getElementById("variacoesDetalhe");
+      if (!container) return;
+      const applyLimits = () => {
+        const groups = {};
+        container.querySelectorAll('input[type="checkbox"][name="variacoes"]').forEach((input) => {
+          const cat = input.dataset.category || "__default__";
+          const max = parseInt(input.dataset.max || "99", 10) || 99;
+          if (!groups[cat]) groups[cat] = { max, inputs: [] };
+          groups[cat].max = max;
+          groups[cat].inputs.push(input);
+        });
+        Object.values(groups).forEach((group) => {
+          const checked = group.inputs.filter((el) => el.checked).length;
+          group.inputs.forEach((el) => {
+            if (!el.checked && checked >= group.max) {
+              el.disabled = true;
+            } else {
+              el.disabled = false;
+            }
+          });
+        });
+      };
+      container.querySelectorAll('input[type="checkbox"][name="variacoes"]').forEach((input) => {
+        input.addEventListener("change", applyLimits);
+      });
+      applyLimits();
+    })();
+  </script>
+{% endblock %}

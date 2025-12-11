@@ -1,0 +1,129 @@
+﻿{% extends "base.html" %}
+
+{% block title %}Configuracao do Portal{% endblock %}
+
+{% block content %}
+  <section class="config-section">
+    <header class="config-header">
+      <p class="config-overline">Configuracao</p>
+      <h1>Controle o que aparece no catalogo</h1>
+      <p>Alinhe o perfil do catalogo com a paleta, categorias e destaques que os clientes veem.</p>
+    </header>
+
+    <div class="config-grid">
+      <a href="{% url 'core:perfil_catalogo' %}" class="config-card-link">
+        <article class="config-card">
+          <p class="config-card-label">Perfil Catalogo</p>
+          <h3>Atualize o visual da vitrine</h3>
+          <p>Defina titulos, destaques em degrade e organize as categorias que aparecerao aos clientes.</p>
+          <p class="config-card-meta">Ultima atualizacao ha 2 dias</p>
+          <span class="config-card-cta">Acessar</span>
+        </article>
+      </a>
+      <a href="{% url 'core:papelaria_perfil' %}" class="config-card-link">
+        <article class="config-card">
+          <p class="config-card-label">Meu perfil</p>
+          <h3>Compartilhe o catalogo certo</h3>
+          <p>Mostre o nome do negocio, WhatsApp e o link publico do seu catalogo com base no slug do tenant.</p>
+          <p class="config-card-meta">Ideal para divulgar o link ao cliente</p>
+          <span class="config-card-cta">Abrir perfil</span>
+        </article>
+      </a>
+      <a href="{% url 'catalogo:home' %}" class="config-card-link">
+        <article class="config-card">
+          <p class="config-card-label">Catalogo Online</p>
+          <h3>Ver vitrine publica</h3>
+          <p>Abra a loja publica para revisar produtos, variacoes e imagens como o cliente enxerga.</p>
+          <p class="config-card-meta">Abre em nova aba</p>
+          <span class="config-card-cta">Abrir catalogo</span>
+        </article>
+      </a>
+      <article class="config-card config-card--support">
+        <h3>Outros ajustes</h3>
+        <ul>
+          <li>Canais ativos para publicacao</li>
+          <li>Integracoes com marketplaces</li>
+          <li>Regras de desconto e frete</li>
+        </ul>
+        <p class="config-card-note">Cada aba abre uma nova tela para manter o fluxo organizado.</p>
+      </article>
+    </div>
+  </section>
+
+  <style>
+    .config-section {
+      padding: 2rem;
+      background: #fff;
+      border-radius: 32px;
+      box-shadow: 0 25px 60px rgba(15, 23, 42, 0.15);
+      margin: 2rem 0;
+    }
+
+    .config-header h1 {
+      margin: 0.25rem 0;
+      font-size: 2.4rem;
+    }
+
+    .config-overline {
+      text-transform: uppercase;
+      letter-spacing: 0.3em;
+      color: #94a3b8;
+      font-size: 0.75rem;
+    }
+
+    .config-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 1.25rem;
+      margin-top: 1.5rem;
+    }
+
+    .config-card-link { text-decoration: none; }
+
+    .config-card {
+      padding: 1.75rem;
+      border-radius: 24px;
+      border: 1px solid rgba(15, 23, 42, 0.08);
+      background: #f8fafc;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      color: inherit;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .config-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 20px 50px rgba(15, 23, 42, 0.15);
+    }
+
+    .config-card-label {
+      font-size: 0.75rem;
+      letter-spacing: 0.3em;
+      text-transform: uppercase;
+      color: #94a3b8;
+      margin: 0;
+    }
+
+    .config-card h3 { margin: 0; font-size: 1.6rem; }
+    .config-card p { margin: 0; color: #475569; }
+    .config-card-meta { color: #0f172a; font-weight: 600; }
+
+    .config-card-cta {
+      margin-top: auto;
+      padding: 0.65rem 1rem;
+      border-radius: 999px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      background: linear-gradient(120deg, #ec4899, #d946ef);
+      color: #fff;
+      align-self: flex-start;
+    }
+
+    .config-card--support { display: flex; flex-direction: column; gap: 0.75rem; }
+    .config-card--support ul { margin: 0; padding-left: 1.1rem; color: #475569; }
+    .config-card-note { font-size: 0.9rem; color: #94a3b8; margin: 0; }
+  </style>
+{% endblock %}
