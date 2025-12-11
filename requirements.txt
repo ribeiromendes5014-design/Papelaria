@@ -1,7 +1,0 @@
-Django>=4.2
-psycopg2-binary>=2.9
-requests>=2.31
-Pillow
-dj-database-url
-whitenoise
-gunicorn
