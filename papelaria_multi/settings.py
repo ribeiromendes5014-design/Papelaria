@@ -101,8 +101,15 @@ AUTHENTICATION_BACKENDS = [
     "django.contrib.auth.backends.ModelBackend",
 ]
 
-ALLOWED_HOSTS = ["localhost", "127.0.0.1", "192.168.3.3", ".onrender.com"]
-CSRF_TRUSTED_ORIGINS = ["https://*.onrender.com"]
+ALLOWED_HOSTS = [
+    "localhost",
+    "127.0.0.1",
+    "192.168.3.3",
+    ".onrender.com",
+    "papelariaribeiro.top",
+    ".papelariaribeiro.top",
+]
+CSRF_TRUSTED_ORIGINS = ["https://*.onrender.com", "https://papelariaribeiro.top", "https://*.papelariaribeiro.top"]
 
 STATIC_URL = "/static/"
 STATIC_ROOT = BASE_DIR / "staticfiles"
