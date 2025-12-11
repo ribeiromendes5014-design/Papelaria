@@ -1,0 +1,134 @@
+{% extends "base.html" %}
+
+{% block navigation %}{% endblock %}
+
+{% block footer %}{% endblock %}
+
+{% block content %}
+  <style>
+    body {
+      background: linear-gradient(135deg, #cfe9ff 0%, #e0f4ff 50%, #fefefe 100%);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .login-wrapper {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .login-card {
+      width: min(420px, 90vw);
+      background: #ffffffdd;
+      padding: 2.5rem;
+      border-radius: 20px;
+      box-shadow: 0 20px 45px rgba(15, 23, 42, 0.15);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.6);
+    }
+
+    .login-card h2 {
+      margin-bottom: 1rem;
+      color: #0f172a;
+      font-size: 1.9rem;
+      letter-spacing: 0.02em;
+    }
+
+    .field-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0.35rem;
+      margin-bottom: 1rem;
+    }
+
+    .field-group label {
+      font-weight: 600;
+      color: #475569;
+      font-size: 0.95rem;
+    }
+
+    .field-group input {
+      border: 1px solid rgba(71, 85, 105, 0.4);
+      border-radius: 10px;
+      padding: 0.85rem 1rem;
+      font-size: 1rem;
+      background: #f8fbff;
+      transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .field-group input:focus {
+      outline: none;
+      border-color: #2563eb;
+      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.25);
+    }
+
+    .remember {
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+      margin-bottom: 1rem;
+      color: #475569;
+      font-size: 0.9rem;
+    }
+
+    .login-card button {
+      width: 100%;
+      border: none;
+      border-radius: 12px;
+      padding: 0.95rem;
+      font-size: 1rem;
+      font-weight: 600;
+      color: white;
+      background: linear-gradient(120deg, #3b82f6, #60a5fa);
+      cursor: pointer;
+      margin-top: 0.5rem;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .login-card button:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 10px 25px rgba(59, 130, 246, 0.35);
+    }
+
+    .errors {
+      margin-bottom: 1rem;
+      padding: 0.65rem 0.9rem;
+      background: #fee2e2;
+      color: #b91c1c;
+      border-radius: 10px;
+      border: 1px solid rgba(185, 28, 28, 0.4);
+    }
+  </style>
+
+  <section class="login-wrapper">
+    <div class="login-card">
+    <h2>Entrar</h2>
+    {% if form.non_field_errors %}
+      <div class="errors">
+        {{ form.non_field_errors }}
+      </div>
+    {% endif %}
+    <form method="post">
+      {% csrf_token %}
+      <div class="field-group">
+        <label for="{{ form.username.id_for_label }}">E-mail</label>
+        {{ form.username }}
+      </div>
+      <div class="field-group">
+        <label for="{{ form.password.id_for_label }}">Senha</label>
+        {{ form.password }}
+      </div>
+      <div class="remember">
+        <label>
+          {{ form.remember_me }} {{ form.remember_me.label }}
+        </label>
+      </div>
+      <button type="submit">Entrar</button>
+    </form>
+    </div>
+  </section>
+{% endblock %}

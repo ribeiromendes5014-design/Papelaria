@@ -1,0 +1,935 @@
+{% extends "base.html" %}
+
+{% block content %}
+  <style>
+    .products-dashboard {
+      min-height: 100vh;
+      background: linear-gradient(180deg, #ede5ff 0%, #f7f7ff 50%, #ffffff 100%);
+      padding: 3rem 2.5rem 4rem;
+    }
+
+    .products-header {
+      background: #fff;
+      border-radius: 26px;
+      padding: 2rem;
+      margin-bottom: 1.75rem;
+      box-shadow: 0 30px 60px rgba(15, 23, 42, 0.08);
+      display: flex;
+      flex-direction: column;
+      gap: 1.25rem;
+    }
+
+    .header-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+
+    .header-row h1 {
+      margin: 0;
+      font-size: 2.3rem;
+      color: #0f172a;
+    }
+
+    .header-controls {
+      display: flex;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+    }
+
+    .header-controls a,
+    .header-controls button {
+      border-radius: 14px;
+      padding: 0.9rem 1.3rem;
+      font-weight: 600;
+      font-size: 0.95rem;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.4rem;
+      min-width: 160px;
+      transition: transform 0.2s ease;
+      color: #fff;
+      box-shadow: 0 12px 25px rgba(15, 23, 42, 0.15);
+    }
+
+    .header-controls .primary {
+      background: linear-gradient(120deg, #7c3aed, #a855f7);
+    }
+
+    .header-controls .ghost {
+      background: #f5f5ff;
+      color: #0f172a;
+      box-shadow: none;
+      border: 1px solid rgba(15, 23, 42, 0.15);
+    }
+
+    .header-controls a:hover {
+      transform: translateY(-2px);
+    }
+
+    .filters-grid {
+      background: #fff;
+      border-radius: 22px;
+      padding: 1.4rem 1.5rem;
+      box-shadow: 0 25px 55px rgba(15, 23, 42, 0.08);
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1rem;
+      align-items: center;
+    }
+
+    .filters-grid input,
+    .filters-grid select {
+      border-radius: 12px;
+      border: 1px solid rgba(15, 23, 42, 0.15);
+      padding: 0.85rem 1rem;
+      background: #f7f5ff;
+      font-size: 0.95rem;
+      color: #0f172a;
+      width: 100%;
+    }
+
+    .filter-actions {
+      display: flex;
+      gap: 0.6rem;
+      justify-content: flex-end;
+      flex-wrap: wrap;
+    }
+
+    .filter-actions button {
+      border: none;
+      border-radius: 12px;
+      padding: 0.75rem 1.4rem;
+      font-weight: 600;
+      cursor: pointer;
+      color: #fff;
+      transition: transform 0.2s ease;
+    }
+
+    .filter-actions .secondary {
+      background: #111827;
+      opacity: 0.85;
+    }
+
+    .filter-actions .primary {
+      background: linear-gradient(120deg, #4f46e5, #a855f7);
+    }
+
+    .products-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 1rem;
+    }
+
+    .product-card {
+      background: #fff;
+      border-radius: 20px;
+      padding: 1.1rem;
+      box-shadow: 0 20px 55px rgba(15, 23, 42, 0.1);
+      border: 1px solid rgba(15, 23, 42, 0.08);
+      display: grid;
+      grid-template-columns: 96px 1fr;
+      gap: 0.9rem;
+      align-items: center;
+    }
+
+    .product-card .product-image {
+      width: 96px;
+      height: 96px;
+      border-radius: 16px;
+      background: #e0e7ff;
+      background-size: cover;
+      background-position: center;
+      box-shadow: inset 0 0 0 1px rgba(15, 23, 42, 0.08);
+    }
+
+    .product-card .product-image.empty::after {
+      content: "Sem imagem";
+      color: #475569;
+      font-size: 0.85rem;
+      display: block;
+      text-align: center;
+      line-height: 120px;
+    }
+
+    .product-card .product-body {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    .product-card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.5rem;
+    }
+
+    .product-card h3 {
+      margin: 0;
+      font-size: 1.4rem;
+      color: #0f172a;
+    }
+
+    .product-card small {
+      color: #6b7280;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      font-size: 0.7rem;
+    }
+
+    .product-card .product-meta {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      gap: 0.5rem;
+      font-size: 0.9rem;
+      color: #475569;
+    }
+
+    .product-card .product-meta span {
+      display: flex;
+      flex-direction: column;
+      gap: 0.15rem;
+    }
+
+    .product-card .tags {
+      display: flex;
+      gap: 0.45rem;
+      flex-wrap: wrap;
+    }
+
+    .product-card .tag {
+      border-radius: 999px;
+      padding: 0.3rem 0.9rem;
+      font-size: 0.75rem;
+      font-weight: 600;
+      background: rgba(15, 23, 42, 0.07);
+      color: #0f172a;
+    }
+
+    .product-actions {
+      display: flex;
+      gap: 0.5rem;
+    }
+
+    .product-actions button,
+    .product-actions a,
+    .product-actions form button {
+      border: none;
+      border-radius: 50%;
+      width: 38px;
+      height: 38px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      font-size: 1.1rem;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+      text-decoration: none;
+      box-shadow: 0 8px 25px rgba(15, 23, 42, 0.25);
+    }
+
+    .product-actions button:hover,
+    .product-actions a:hover,
+    .product-actions form button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 30px rgba(15, 23, 42, 0.35);
+    }
+
+    .product-actions form {
+      margin: 0;
+    }
+
+    .product-actions .view {
+      background: linear-gradient(160deg, #2563eb, #4f46e5);
+    }
+
+    .product-actions .edit {
+      background: linear-gradient(160deg, #4c1d95, #a855f7);
+    }
+
+    .product-actions .delete {
+      background: linear-gradient(160deg, #dc2626, #ef4444);
+    }
+
+    .modal-overlay {
+      inset: 0;
+      position: fixed;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      background: rgba(15, 23, 42, 0.5);
+      z-index: 30;
+      padding: 1rem;
+    }
+
+    .modal-overlay.active {
+      display: flex;
+    }
+
+    .modal-card {
+      width: min(640px, 100%);
+      background: linear-gradient(180deg, #f8f5ff 0%, #ffffff 70%);
+      border-radius: 32px;
+      padding: 2.5rem 2.25rem;
+      box-shadow: 0 50px 120px rgba(15, 23, 42, 0.35);
+      position: relative;
+    }
+
+    .modal-card h3 {
+      margin-top: 0;
+      margin-bottom: 0.25rem;
+      color: #0f172a;
+      font-size: 1.75rem;
+    }
+
+    .modal-hero {
+      display: flex;
+      flex-direction: column;
+      gap: 0.35rem;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid rgba(15, 23, 42, 0.08);
+      margin-bottom: 1.25rem;
+    }
+
+    .modal-hero .badge {
+      align-self: flex-start;
+      font-size: 0.75rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      background: rgba(124, 58, 237, 0.15);
+      color: #7c3aed;
+      padding: 0.35rem 0.85rem;
+      border-radius: 999px;
+      font-weight: 600;
+    }
+
+    .modal-subtitle {
+      color: #475569;
+      font-size: 0.95rem;
+      margin: 0;
+    }
+
+    .modal-form-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 1rem;
+    }
+
+    .form-field {
+      display: flex;
+      flex-direction: column;
+      gap: 0.35rem;
+    }
+
+    .form-field label {
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: #475569;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .form-field.full-width {
+      grid-column: 1 / -1;
+    }
+
+    .modal-card form input,
+    .modal-card form select,
+    .modal-card form textarea {
+      width: 100%;
+      border-radius: 16px;
+      border: 1px solid rgba(15, 23, 42, 0.12);
+      padding: 0.95rem 1rem;
+      background: #fff;
+      font-size: 0.95rem;
+      transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .modal-card form textarea {
+      min-height: 120px;
+    }
+
+    .modal-card form input:focus,
+    .modal-card form select:focus,
+    .modal-card form textarea:focus {
+      outline: none;
+      border-color: rgba(124, 58, 237, 0.75);
+      box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.2);
+    }
+
+    .form-checkbox-wrapper {
+      display: flex;
+      align-items: center;
+      gap: 0.65rem;
+      padding-top: 0.35rem;
+    }
+
+    .form-checkbox-wrapper label {
+      font-weight: 600;
+      letter-spacing: 0.05em;
+      color: #475569;
+      margin-bottom: 0;
+    }
+
+    .file-hint {
+      font-size: 0.8rem;
+      color: #6b7280;
+      margin: 0.15rem 0 0;
+    }
+
+    .modal-card .errorlist {
+      margin: 0;
+      padding-left: 1.1rem;
+      color: #b91c1c;
+      font-size: 0.8rem;
+    }
+
+    .modal-card .errorlist li {
+      list-style-type: disc;
+    }
+
+    .modal-card form input,
+    .modal-card form select,
+    .modal-card form textarea {
+      border-radius: 14px;
+      border: 1px solid rgba(15, 23, 42, 0.12);
+      padding: 0.9rem 1rem;
+      background: #ffffff;
+      font-size: 0.95rem;
+      transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .modal-card form input:focus,
+    .modal-card form select:focus,
+    .modal-card form textarea:focus {
+      outline: none;
+      border-color: rgba(124, 58, 237, 0.75);
+      box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.2);
+    }
+
+    .variacoes-panel {
+      margin: 1rem 0 1.25rem;
+      background: #f8f5ff;
+      border: 1px dashed rgba(124, 58, 237, 0.3);
+      border-radius: 16px;
+      padding: 1rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+
+    .variacoes-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+    }
+
+    .variacoes-header h4 {
+      margin: 0;
+      color: #0f172a;
+    }
+
+    .variacao-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+
+    .variacao-card {
+      background: #fff;
+      border-radius: 14px;
+      padding: 0.85rem;
+      border: 1px solid rgba(15, 23, 42, 0.08);
+      box-shadow: 0 8px 20px rgba(15, 23, 42, 0.06);
+    }
+
+    .variacao-actions {
+      display: flex;
+      justify-content: flex-end;
+      margin-top: 0.35rem;
+    }
+
+    .remove-variacao {
+      background: transparent;
+      color: #dc2626;
+      border: 1px solid rgba(220, 38, 38, 0.35);
+      border-radius: 10px;
+      padding: 0.35rem 0.65rem;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .add-variacao {
+      border: none;
+      background: #4f46e5;
+      color: #fff;
+      padding: 0.55rem 0.9rem;
+      border-radius: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      box-shadow: 0 10px 25px rgba(79, 70, 229, 0.35);
+    }
+
+    .modal-card .modal-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 0.65rem;
+      flex-wrap: wrap;
+    }
+
+    .modal-card .modal-actions button {
+      border-radius: 14px;
+      padding: 0.75rem 1.2rem;
+      font-weight: 600;
+      border: none;
+      cursor: pointer;
+    }
+
+    .modal-card .modal-actions .secondary {
+      background: #eef2ff;
+      color: #312e81;
+    }
+
+    .modal-card .modal-actions .primary {
+      background: linear-gradient(120deg, #4f46e5, #a855f7);
+      color: #fff;
+    }
+
+    .modal-close {
+      position: absolute;
+      top: 1rem;
+      right: 1rem;
+      border: none;
+      background: transparent;
+      font-size: 1.5rem;
+      cursor: pointer;
+      color: #475569;
+    }
+
+    @media (max-width: 900px) {
+      .filters-grid {
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      }
+
+      .header-controls {
+        width: 100%;
+        justify-content: flex-start;
+      }
+    }
+
+    @media (max-width: 700px) {
+      .products-grid {
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      }
+      .product-card {
+        grid-template-columns: 80px 1fr;
+        padding: 0.9rem;
+        gap: 0.75rem;
+      }
+      .product-card .product-image {
+        width: 80px;
+        height: 80px;
+        border-radius: 14px;
+      }
+      .product-card h3 { font-size: 1.1rem; }
+    }
+
+    @media (max-width: 540px) {
+      .products-dashboard { padding: 1.25rem 0.85rem 1.75rem; }
+      .product-card {
+        grid-template-columns: 70px 1fr;
+        padding: 0.7rem 0.75rem;
+        border-radius: 16px;
+        gap: 0.65rem;
+      }
+      .product-card .product-image {
+        width: 70px;
+        height: 70px;
+        border-radius: 12px;
+      }
+      .product-card h3 { font-size: 1rem; margin-bottom: 0.15rem; }
+      .product-card small { font-size: 0.65rem; }
+      .product-card .product-body { gap: 0.35rem; }
+      .product-card .product-meta {
+        grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+        gap: 0.35rem;
+        font-size: 0.85rem;
+      }
+      .product-card .tags { gap: 0.35rem; }
+      .product-card .tag {
+        padding: 0.25rem 0.7rem;
+        font-size: 0.7rem;
+      }
+      .product-actions {
+        gap: 0.35rem;
+      }
+      .product-actions button,
+      .product-actions a,
+      .product-actions form button {
+        width: 34px;
+        height: 34px;
+        font-size: 1rem;
+      }
+    }
+
+    @media (max-width: 420px) {
+      .products-grid {
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+        gap: 0.65rem;
+      }
+      .product-card {
+        grid-template-columns: 64px 1fr;
+        padding: 0.6rem 0.65rem;
+      }
+      .product-card .product-image {
+        width: 64px;
+        height: 64px;
+      }
+      .product-card h3 { font-size: 0.95rem; }
+      .product-card .product-meta { font-size: 0.8rem; }
+      .product-card .tag { font-size: 0.68rem; }
+    }
+  </style>
+
+  <section class="products-dashboard">
+    <header class="products-header">
+      <div class="header-row">
+        <div>
+          <small>PapelariaON</small>
+          <h1>Produtos</h1>
+        </div>
+        <div class="header-controls">
+          <a class="ghost" href="{% url 'produtos:categoria_nova' %}?tipo=categoria">
+            Categorias / Subcategorias
+          </a>
+          <button class="primary" type="button" id="open-product-modal">Cadastrar produto</button>
+        </div>
+      </div>
+      <div class="filters-grid">
+        <input type="search" placeholder="Pesquisar produto ou ID" />
+        <select>
+          <option>Selecionar categoria</option>
+          {% for categoria in categorias %}
+            <option>{{ categoria.nome }}</option>
+          {% endfor %}
+        </select>
+        <select>
+          <option>Selecionar subcategoria</option>
+          {% for sub in subcategorias %}
+            <option>{{ sub.nome }}</option>
+          {% endfor %}
+        </select>
+        <input type="text" placeholder="Tamanho / variação" />
+        <div class="filter-actions">
+          <button class="secondary" type="button">Limpar</button>
+          <button class="primary" type="button">Aplicar filtros</button>
+        </div>
+      </div>
+    </header>
+
+    <div class="products-grid">
+      {% for produto in produtos %}
+        <article class="product-card">
+          <div
+            class="product-image {% if not produto.imagem %}empty{% endif %}"
+            {% if produto.imagem %}
+              style="background-image: url('{{ produto.imagem }}');"
+            {% endif %}
+          ></div>
+          <div class="product-body">
+            <div class="product-card-header">
+              <div>
+                <h3>{{ produto.nome }}</h3>
+                <small>#{{ produto.id }}</small>
+              </div>
+              <div class="product-actions">
+                <button class="view" title="Visualizar">+</button>
+                <a class="edit" title="Editar" href="{% url 'produtos:editar' produto.pk %}">✏️</a>
+                <form method="post" action="{% url 'produtos:excluir' produto.pk %}">
+                  {% csrf_token %}
+                  <button class="delete" title="Excluir" type="submit">🗑️</button>
+                </form>
+              </div>
+            </div>
+            <p style="margin:0; color:#475569;">{{ produto.descricao|default:"Sem descrição" }}</p>
+            <div class="product-meta">
+              <span>
+                <strong>Categoria</strong>
+                {{ produto.categoria.nome|default:"-" }}
+              </span>
+              <span>
+                <strong>Subcategoria</strong>
+                {{ produto.subcategoria.nome|default:"-" }}
+              </span>
+              <span>
+                <strong>Preço</strong>
+                R$ {{ produto.preco }}
+              </span>
+              <span>
+                <strong>Estoque</strong>
+                {{ produto.estoque }}
+              </span>
+            </div>
+            <div class="tags">
+              <span class="tag">{% if produto.ativo %}Ativo{% else %}Inativo{% endif %}</span>
+              {% if produto.variacoes.count %}
+                <span class="tag">Variações: {{ produto.variacoes.count }}</span>
+              {% endif %}
+            </div>
+          </div>
+        </article>
+      {% empty %}
+        <p>Nenhum produto cadastrado ainda.</p>
+      {% endfor %}
+    </div>
+  </section>
+  <div class="modal-overlay" id="product-modal" aria-hidden="true">
+    <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="product-modal-title">
+      <button type="button" class="modal-close" data-modal-close aria-label="Fechar modal">&times;</button>
+
+      <div class="modal-hero">
+        <p class="badge">Novo produto</p>
+        <h3 id="product-modal-title">Cadastrar produto</h3>
+        <p class="modal-subtitle">
+          Use a paleta oficial e mantenha os conteúdos atualizados. O cadastro fica disponível para o tenant ativo.
+        </p>
+      </div>
+
+      <form method="post" action="{% url 'produtos:lista' %}" enctype="multipart/form-data">
+        {% csrf_token %}
+        <div class="modal-form-grid">
+          <div class="form-field">
+            <label for="{{ produto_form.nome.id_for_label }}">Nome</label>
+            {{ produto_form.nome }}
+            {{ produto_form.nome.errors }}
+          </div>
+          <div class="form-field">
+            <label for="{{ produto_form.preco.id_for_label }}">Preço</label>
+            {{ produto_form.preco }}
+            {{ produto_form.preco.errors }}
+          </div>
+          <div class="form-field">
+            <label for="{{ produto_form.estoque.id_for_label }}">Estoque</label>
+            {{ produto_form.estoque }}
+            {{ produto_form.estoque.errors }}
+          </div>
+          <div class="form-field">
+            <label for="{{ produto_form.categoria.id_for_label }}">Categoria</label>
+            {{ produto_form.categoria }}
+            {{ produto_form.categoria.errors }}
+          </div>
+          <div class="form-field">
+            <label for="{{ produto_form.subcategoria.id_for_label }}">Subcategoria</label>
+            {{ produto_form.subcategoria }}
+            {{ produto_form.subcategoria.errors }}
+          </div>
+        </div>
+
+        <div class="form-field full-width">
+          <label for="{{ produto_form.descricao.id_for_label }}">Descrição</label>
+          {{ produto_form.descricao }}
+          {{ produto_form.descricao.errors }}
+        </div>
+
+        <div class="form-field full-width">
+          <label for="{{ produto_form.imagem_upload.id_for_label }}">Imagem</label>
+          {{ produto_form.imagem_upload }}
+          {% if produto_form.imagem_upload.errors %}
+            {{ produto_form.imagem_upload.errors }}
+          {% elif produto_form.imagem_upload.help_text %}
+            <p class="file-hint">{{ produto_form.imagem_upload.help_text }}</p>
+          {% endif %}
+        </div>
+        <div class="form-field full-width">
+          <label for="{{ produto_form.imagens_upload.id_for_label }}">Fotos adicionais</label>
+          {{ produto_form.imagens_upload }}
+          {% if produto_form.imagens_upload.errors %}
+            {{ produto_form.imagens_upload.errors }}
+          {% elif produto_form.imagens_upload.help_text %}
+            <p class="file-hint">{{ produto_form.imagens_upload.help_text }}</p>
+          {% endif %}
+        </div>
+
+        <div class="variacoes-panel" data-variacoes-panel>
+          <div class="variacoes-header">
+            <div>
+              <p class="modal-subtitle" style="margin:0; font-weight:600;">Variações (tamanho / modelo)</p>
+              <small style="color:#6b7280;">Cadastre combinações como tamanho, cor ou embalagem.</small>
+            </div>
+            <button type="button" class="add-variacao" data-add-variacao>Adicionar variação</button>
+          </div>
+
+          {{ variacao_formset.management_form }}
+          <div class="variacao-list" data-variacoes-container>
+            {% for variacao_form in variacao_formset %}
+              <div class="variacao-card" data-variacao-card data-form-index="{{ forloop.counter0 }}">
+                {% for hidden in variacao_form.hidden_fields %}{{ hidden }}{% endfor %}
+                <div class="modal-form-grid">
+                  <div class="form-field">
+                    <label>Categoria</label>
+                    {{ variacao_form.categoria_nome }}
+                    {{ variacao_form.categoria_nome.errors }}
+                  </div>
+                  <div class="form-field">
+                    <label>Máx escolhas</label>
+                    {{ variacao_form.categoria_max_escolhas }}
+                    {{ variacao_form.categoria_max_escolhas.errors }}
+                  </div>
+                  <div class="form-field">
+                    <label>Nome / modelo</label>
+                    {{ variacao_form.nome }}
+                    {{ variacao_form.nome.errors }}
+                  </div>
+                  <div class="form-field">
+                    <label>Tamanho (opcional)</label>
+                    {{ variacao_form.tamanho }}
+                    {{ variacao_form.tamanho.errors }}
+                  </div>
+                  <div class="form-field">
+                    <label>Preço adicional</label>
+                    {{ variacao_form.preco_adicional }}
+                    {{ variacao_form.preco_adicional.errors }}
+                  </div>
+                </div>
+                <div class="variacao-actions">
+                  <div class="variacao-delete-field" style="display:none;">
+                    {% if variacao_form.DELETE %}{{ variacao_form.DELETE }}{% endif %}
+                  </div>
+                  <button type="button" class="remove-variacao" data-remove-variacao>Remover</button>
+                </div>
+              </div>
+            {% endfor %}
+          </div>
+
+          <template id="variacao-empty-form-template">
+            <div class="variacao-card" data-variacao-card data-form-index="__prefix__">
+              {% for hidden in variacao_formset.empty_form.hidden_fields %}{{ hidden }}{% endfor %}
+              <div class="modal-form-grid">
+                <div class="form-field">
+                  <label>Categoria</label>
+                  {{ variacao_formset.empty_form.categoria_nome }}
+                </div>
+                <div class="form-field">
+                  <label>Máx escolhas</label>
+                  {{ variacao_formset.empty_form.categoria_max_escolhas }}
+                </div>
+                <div class="form-field">
+                  <label>Nome / modelo</label>
+                  {{ variacao_formset.empty_form.nome }}
+                </div>
+                <div class="form-field">
+                  <label>Tamanho (opcional)</label>
+                  {{ variacao_formset.empty_form.tamanho }}
+                </div>
+                <div class="form-field">
+                  <label>Preço adicional</label>
+                  {{ variacao_formset.empty_form.preco_adicional }}
+                </div>
+              </div>
+              <div class="variacao-actions">
+                <div class="variacao-delete-field" style="display:none;">
+                  {% if variacao_formset.empty_form.DELETE %}{{ variacao_formset.empty_form.DELETE }}{% endif %}
+                </div>
+                <button type="button" class="remove-variacao" data-remove-variacao>Remover</button>
+              </div>
+            </div>
+          </template>
+        </div>
+
+        <div class="form-field">
+          <div class="form-checkbox-wrapper">
+            {{ produto_form.ativo }}
+            <label for="{{ produto_form.ativo.id_for_label }}">Ativo</label>
+          </div>
+          {{ produto_form.ativo.errors }}
+        </div>
+
+        <div class="modal-actions">
+          <button type="button" class="secondary" data-modal-close>Cancelar</button>
+          <button type="submit" class="primary">Salvar</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    (function () {
+      const modal = document.getElementById("product-modal");
+      const openButton = document.getElementById("open-product-modal");
+      const closeButtons = modal.querySelectorAll("[data-modal-close]");
+
+      const toggleModal = (show) => {
+        modal.classList.toggle("active", show);
+        modal.setAttribute("aria-hidden", !show);
+      };
+
+      openButton.addEventListener("click", () => toggleModal(true));
+
+      closeButtons.forEach((button) =>
+        button.addEventListener("click", () => toggleModal(false)),
+      );
+
+      modal.addEventListener("click", (event) => {
+        if (event.target === modal) {
+          toggleModal(false);
+        }
+      });
+
+      document.addEventListener("keydown", (event) => {
+        if (event.key === "Escape") {
+          toggleModal(false);
+        }
+      });
+    })();
+
+    (function () {
+      const panels = document.querySelectorAll("[data-variacoes-panel]");
+      if (!panels.length) return;
+
+      const initPanel = (panel) => {
+        const container = panel.querySelector("[data-variacoes-container]");
+        const addButton = panel.querySelector("[data-add-variacao]");
+        const totalInput = panel.querySelector('input[name="variacoes-TOTAL_FORMS"]');
+        const template = panel.querySelector("#variacao-empty-form-template");
+        if (!container || !totalInput || !template) return;
+
+        const bindRemove = (card) => {
+          const removeBtn = card.querySelector("[data-remove-variacao]");
+          if (!removeBtn) return;
+          removeBtn.addEventListener("click", () => {
+            const deleteInput = card.querySelector('input[name$="-DELETE"]');
+            if (deleteInput) {
+              deleteInput.checked = true;
+            }
+            card.style.display = "none";
+          });
+        };
+
+        container.querySelectorAll("[data-variacao-card]").forEach(bindRemove);
+
+        if (addButton) {
+          addButton.addEventListener("click", () => {
+            const formCount = parseInt(totalInput.value, 10) || 0;
+            const html = template.innerHTML.replace(/__prefix__/g, formCount);
+            const wrapper = document.createElement("div");
+            wrapper.innerHTML = html.trim();
+            const newCard = wrapper.firstElementChild;
+            container.appendChild(newCard);
+            totalInput.value = formCount + 1;
+            bindRemove(newCard);
+          });
+        }
+      };
+
+      panels.forEach(initPanel);
+    })();
+  </script>
+{% endblock %}
