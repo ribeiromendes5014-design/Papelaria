@@ -1,0 +1,175 @@
+{% extends "base.html" %}
+
+{% block content %}
+  <style>
+    .category-screen {
+      min-height: 100vh;
+      background: linear-gradient(135deg, #f5f3ff, #eef2ff 60%, #ffffff);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 3rem 1rem;
+    }
+
+    .category-card {
+      width: min(520px, 100%);
+      background: #fff;
+      border-radius: 28px;
+      padding: 2.25rem;
+      box-shadow: 0 30px 60px rgba(15, 23, 42, 0.15);
+      border: 1px solid rgba(15, 23, 42, 0.08);
+    }
+
+    .category-card h1 {
+      margin-top: 0;
+      font-size: 2rem;
+      margin-bottom: 1.2rem;
+      color: #0f172a;
+    }
+
+    .category-card form {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .field {
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+      font-size: 0.95rem;
+      color: #475569;
+    }
+
+    .field input,
+    .field select,
+    .field textarea {
+      border-radius: 12px;
+      border: 1px solid rgba(15, 23, 42, 0.15);
+      padding: 0.9rem 1rem;
+      font-size: 1rem;
+      background: #f5f7ff;
+      color: #0f172a;
+    }
+
+    .type-selector {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 0.6rem;
+    }
+
+    .type-option {
+      border: 1px solid rgba(99, 102, 241, 0.5);
+      border-radius: 12px;
+      padding: 0.85rem;
+      text-align: center;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.2s ease, color 0.2s ease;
+      color: #4c1d95;
+    }
+
+    .type-option input {
+      display: none;
+    }
+
+    .type-option.active {
+      background: rgba(124, 58, 237, 0.15);
+      border-color: #7c3aed;
+      color: #27136f;
+    }
+
+    .category-card button {
+      border: none;
+      border-radius: 14px;
+      padding: 0.9rem 1.3rem;
+      font-size: 1rem;
+      font-weight: 600;
+      color: #fff;
+      background: linear-gradient(120deg, #7c3aed, #a855f7);
+      cursor: pointer;
+      box-shadow: 0 15px 35px rgba(15, 23, 42, 0.2);
+    }
+
+    .parent-field {
+      transition: max-height 0.25s ease, opacity 0.25s ease;
+      overflow: hidden;
+    }
+  </style>
+
+  <section class="category-screen">
+    <div class="category-card">
+      <h1>Cadastrar categoria</h1>
+      <form method="post">
+        {% csrf_token %}
+        <div class="type-selector" id="type-selector">
+          {% for option in form.tipo %}
+            <label class="type-option" data-value="{{ option.choice_value }}">
+              {{ option.tag }}
+              <span>{{ option.choice_label }}</span>
+            </label>
+          {% endfor %}
+        </div>
+        <div class="field">
+          <label for="{{ form.nome.id_for_label }}">Nome</label>
+          {{ form.nome }}
+        </div>
+        <div class="field">
+          <label for="{{ form.descricao.id_for_label }}">Descrição</label>
+          {{ form.descricao }}
+        </div>
+        <div class="field parent-field" id="parent-field" style="max-height:0; opacity:0;">
+          <label for="{{ form.parent.id_for_label }}">Categoria pai (apenas para subcategoria)</label>
+          {{ form.parent }}
+        </div>
+        <button type="submit">Salvar</button>
+      </form>
+    </div>
+  </section>
+
+  <script>
+    (function () {
+      const selector = document.getElementById("type-selector");
+      const parentField = document.getElementById("parent-field");
+      const typeInputs = Array.from(selector.querySelectorAll("input[name='{{ form.tipo.name }}']"));
+
+      const sync = () => {
+        const checked = typeInputs.find((input) => input.checked);
+        selector.querySelectorAll(".type-option").forEach((card) => {
+          const target = card.getAttribute("data-value");
+          card.classList.toggle("active", checked && checked.value === target);
+        });
+
+        if (checked && checked.value === "subcategoria") {
+          parentField.style.maxHeight = "150px";
+          parentField.style.opacity = "1";
+        } else {
+          parentField.style.maxHeight = "0";
+          parentField.style.opacity = "0";
+        }
+      };
+
+      selector.addEventListener("click", (event) => {
+        const option = event.target.closest(".type-option");
+        if (!option) {
+          return;
+        }
+        const value = option.getAttribute("data-value");
+        const input = typeInputs.find((item) => item.value === value);
+        if (input) {
+          input.checked = true;
+          sync();
+        }
+      });
+
+      typeInputs.forEach((input) => {
+        input.addEventListener("change", sync);
+      });
+
+      sync();
+    })();
+  </script>
+{% endblock %}

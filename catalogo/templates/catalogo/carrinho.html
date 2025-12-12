@@ -1,0 +1,284 @@
+{% extends "base.html" %}
+
+{% block title %}Carrinho - Portal da Papelaria{% endblock %}
+
+{% block content %}
+  <section class="catalog-cart">
+    <header class="cart-header">
+      <div>
+        <p class="cart-label">Carrinho</p>
+        <h2>Finalizar pedido</h2>
+      </div>
+      <p class="cart-subtitle">Itens adicionados ficam disponíveis mesmo que você navegue em outras telas.</p>
+    </header>
+
+    {% if cart_items %}
+      <div class="cart-items">
+        {% for item in cart_items %}
+          <article class="cart-item">
+            {% if item.imagem %}
+              <div class="cart-item-image" style="background-image: url('{{ item.imagem }}');"></div>
+            {% else %}
+              <div class="cart-item-image empty">
+                Sem imagem
+              </div>
+            {% endif %}
+            <div class="cart-item-body">
+              <h3>{{ item.nome }}</h3>
+              {% if item.variacao_label %}
+                <p class="cart-variation">Variação: {{ item.variacao_label }}</p>
+              {% endif %}
+              <p class="cart-product-quantity">Quantidade: {{ item.quantidade }}</p>
+              <p class="cart-product-price">R$ {{ item.preco|floatformat:2 }}</p>
+              <div class="cart-item-actions">
+                <form method="post" action="{% url 'catalogo:carrinho_adicionar' item.produto_id %}">
+                  {% csrf_token %}
+                  <input type="hidden" name="next" value="{% url 'catalogo:carrinho' %}">
+                  <input type="hidden" name="destination" value="cart">
+                  {% if item.variacao_id %}
+                    <input type="hidden" name="variacao_id" value="{{ item.variacao_id }}">
+                  {% endif %}
+                  <button type="submit" class="catalog-icon-btn small">+</button>
+                </form>
+                <form method="post" action="{% url 'catalogo:carrinho_atualizar' item.item_key %}">
+                  {% csrf_token %}
+                  <input type="hidden" name="item_key" value="{{ item.item_key }}">
+                  <input type="hidden" name="next" value="{% url 'catalogo:carrinho' %}">
+                  <button type="submit" name="action" value="decrement" class="cart-link">- 1</button>
+                  <button type="submit" name="action" value="remove" class="cart-link danger">Remover</button>
+                </form>
+              </div>
+            </div>
+          </article>
+        {% endfor %}
+      </div>
+      <footer class="cart-summary">
+        <div>
+          <p class="cart-label">Total do carrinho</p>
+          <strong>R$ {{ cart_total|floatformat:2 }}</strong>
+        </div>
+        <button
+          type="button"
+          class="catalog-primary-btn"
+          id="cartCheckoutBtn"
+          onclick="window.location.href='{% url 'catalogo:checkout' %}'"
+        >
+          Prosseguir para o checkout
+        </button>
+      </footer>
+    {% else %}
+      <p class="empty-state">Nenhum item no carrinho. Vamos escolher algo?</p>
+      <a class="catalog-primary-btn" href="{% url 'catalogo:home' %}">Voltar ao catálogo</a>
+    {% endif %}
+  </section>
+
+  <style>
+    .catalog-cart {
+      background: #fff;
+      border-radius: 32px;
+      padding: 2rem;
+      margin: 3rem auto 1rem;
+      max-width: 980px;
+      box-shadow: 0 35px 90px rgba(15, 23, 42, 0.15);
+      border: 1px solid rgba(15, 23, 42, 0.08);
+    }
+
+    .cart-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .cart-label {
+      text-transform: uppercase;
+      letter-spacing: 0.3em;
+      color: #94a3b8;
+      font-size: 0.75rem;
+      margin: 0;
+    }
+
+    .cart-header h2 {
+      margin: 0;
+      font-size: 2.2rem;
+      color: #0f172a;
+    }
+
+    .cart-subtitle {
+      flex: 1;
+      margin: 0;
+      color: #475569;
+      font-size: 0.95rem;
+      text-align: right;
+    }
+
+    .cart-items {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .cart-item {
+      display: grid;
+      grid-template-columns: 140px 1fr;
+      background: #f8fafc;
+      border-radius: 24px;
+      overflow: hidden;
+      border: 1px solid rgba(15, 23, 42, 0.08);
+    }
+
+    .cart-item-image {
+      min-height: 160px;
+      background-size: cover;
+      background-position: center;
+    }
+
+    .cart-item-image.empty {
+      display: grid;
+      place-items: center;
+      background: rgba(15, 23, 42, 0.1);
+      color: #475569;
+      font-weight: 600;
+    }
+
+    .cart-item-body {
+      padding: 1.25rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    .cart-item-body h3 {
+      margin: 0;
+      font-size: 1.2rem;
+      color: #0f172a;
+    }
+
+    .cart-product-quantity,
+    .cart-product-price {
+      margin: 0;
+      font-weight: 600;
+      color: #db2777;
+    }
+
+    .cart-variation {
+      margin: 0;
+      color: #475569;
+      font-size: 0.9rem;
+    }
+
+    .cart-item-actions {
+      display: flex;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+    }
+
+    .catalog-primary-btn {
+      border-radius: 14px;
+      border: none;
+      padding: 0.9rem 1.25rem;
+      background: linear-gradient(120deg, #ec4899, #d946ef);
+      color: #fff;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      box-shadow: 0 15px 35px rgba(236, 72, 153, 0.35);
+      cursor: pointer;
+    }
+
+    .catalog-icon-btn {
+      border-radius: 999px;
+      border: none;
+      color: #fff;
+      background: linear-gradient(180deg, #22c55e, #16a34a);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 10px 25px rgba(34, 197, 94, 0.35);
+    }
+
+    .cart-link {
+      border: none;
+      background: none;
+      color: #0f172a;
+      font-weight: 600;
+      cursor: pointer;
+      padding: 0;
+    }
+
+    .cart-link.danger {
+      color: #ef4444;
+    }
+
+    .catalog-icon-btn.small {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: linear-gradient(180deg, #22c55e, #16a34a);
+      color: #fff;
+      font-size: 1.3rem;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border: none;
+      box-shadow: 0 12px 22px rgba(34, 197, 94, 0.4);
+      cursor: pointer;
+    }
+
+    .cart-summary {
+      margin-top: 2rem;
+      padding-top: 1.5rem;
+      border-top: 1px dashed rgba(15, 23, 42, 0.12);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+
+    .cart-summary strong {
+      font-size: 2rem;
+      color: #db2777;
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 2rem 0;
+      font-size: 1.15rem;
+      color: #475569;
+    }
+
+    @media (max-width: 960px) {
+      .cart-item {
+        grid-template-columns: 1fr;
+      }
+      .cart-subtitle {
+        width: 100%;
+        text-align: left;
+      }
+    }
+
+    @media (max-width: 640px) {
+      .catalog-cart {
+        padding: 1.25rem;
+      }
+      .cart-summary {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+    }
+  </style>
+  <script>
+    (function () {
+      const btn = document.getElementById("cartCheckoutBtn");
+      if (!btn) return;
+      const isMobile = window.innerWidth <= 768;
+      if (isMobile) {
+        const y = btn.getBoundingClientRect().top + window.scrollY - 24;
+        window.scrollTo({ top: y, behavior: "smooth" });
+      }
+    })();
+  </script>
+{% endblock %}
